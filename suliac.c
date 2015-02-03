@@ -6,7 +6,7 @@
 /*   By: sle-guil <sle-guil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/03 11:35:38 by sle-guil          #+#    #+#             */
-/*   Updated: 2015/02/03 11:57:00 by sle-guil         ###   ########.fr       */
+/*   Updated: 2015/02/03 11:58:13 by sle-guil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 int		drop_piece(t_grid *grid, int col)
 {
-	if ((*grid)[col][0] == VIDE)
+	if ((*grid)[0][col] == VIDE)
 		return (1);
 	return (0);
 }
