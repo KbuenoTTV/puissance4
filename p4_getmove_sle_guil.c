@@ -6,15 +6,21 @@
 /*   By: jchichep <jchichep@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2015/02/03 11:39:25 by jchichep          #+#    #+#             */
-/*   Updated: 2015/02/03 15:38:35 by jchichep         ###   ########.fr       */
+/*   Updated: 2015/02/03 17:32:48 by jchichep         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <time.h>
+#include <unistd.h>
 #include "puiss4.h"
-#define DEEP 9
+#define DEEP 7
 
-int		remove_piece(t_grid *grid, int color)
+int		min(t_grid *grid, t_case color, int deep, t_case me);
+
+int		remove_piece(t_grid *grid, int col)
 {
 	int		i;
 
@@ -51,15 +57,20 @@ int		is_winner_horizontal(t_grid *grid)
 {
 	int i;
 	int j;
+	int k;
 
 	i = 0;
 	j = 0;
+	k = 0;
 	while (i < GRID_H)
 	{
-		while (j < GRID_W - 3)
+		while (j < GRID_W - WIN_CNT + 1)
 		{
-			if ((*grid)[i][j] == (*grid)[i][j + 1] && (*grid)[i][j + 1] == (*grid)[i][j + 2] && (*grid)[i][j + 2] == (*grid)[i][j + 3] && (*grid)[i][j] != VIDE)
+			while (k < WIN_CNT - 1 && (*grid)[i][j + k] == (*grid)[i][j + k + 1] && (*grid)[i][j] != VIDE)
+				++k;
+			if (k == WIN_CNT - 1)
 				return (1);
+			k = 0;
 			++j;
 		}
 		j = 0;
@@ -72,15 +83,20 @@ int		is_winner_vertical(t_grid *grid)
 {
 	int i;
 	int j;
+	int k;
 
 	i = 0;
 	j = 0;
-	while (i < GRID_H - 3)
+	k = 0;
+	while (i < GRID_H - WIN_CNT + 1)
 	{
 		while (j < GRID_W)
 		{
-			if ((*grid)[i][j] == (*grid)[i + 1][j] && (*grid)[i + 1][j] == (*grid)[i + 2][j] && (*grid)[i + 2][j] == (*grid)[i + 3][j] && (*grid)[i][j] != VIDE)
+			while (k < WIN_CNT - 1 && (*grid)[i + k][j] == (*grid)[i + k + 1][j] && (*grid)[i][j] != VIDE)
+				++k;
+			if (k == WIN_CNT - 1)
 				return (1);
+			k = 0;
 			++j;
 		}
 		j = 0;
@@ -89,19 +105,24 @@ int		is_winner_vertical(t_grid *grid)
 	return (0);
 }
 
-int		is_winner_diagaonal_left(t_grid *grid)
+int		is_winner_diagonal_left(t_grid *grid)
 {
 	int i;
 	int j;
+	int k;
 
 	i = 0;
 	j = 0;
-	while (i < GRID_H - 3)
+	k = 0;
+	while (i < GRID_H - WIN_CNT + 1)
 	{
-		while (j < GRID_W - 3)
+		while (j < GRID_W - WIN_CNT + 1)
 		{
-			if ((*grid)[i][j] == (*grid)[i + 1][j + 1] && (*grid)[i + 1][j + 1] == (*grid)[i + 2][j + 2] && (*grid)[i + 2][j + 2] == (*grid)[i + 3][j + 3] && (*grid)[i][j] != VIDE)
+			while (k < WIN_CNT - 1 && (*grid)[i + k][j + k] == (*grid)[i + k + 1][j + k + 1] && (*grid)[i][j] != VIDE)
+				++k;
+			if (k == WIN_CNT - 1)
 				return (1);
+			k = 0;
 			++j;
 		}
 		j = 0;
@@ -114,15 +135,20 @@ int		is_winner_diagonal_right(t_grid *grid)
 {
 	int i;
 	int j;
+	int k;
 
-	i = 3;
+	i = GRID_H - WIN_CNT;
 	j = 0;
+	k = 0;
 	while (i < GRID_H)
 	{
-		while (j < GRID_W < 3)
+		while (j < GRID_W - WIN_CNT + 1)
 		{
-			if ((*grid)[i][j] == (*grid)[i - 1][j + 1] && (*grid)[i - 1][j + 1] == (*grid)[i - 2][j + 2] && (*grid)[i - 2][j + 2] == (*grid)[i - 3][j + 3] && (*grid)[i][j] != VIDE)
+			while (k < WIN_CNT - 1 && (*grid)[i - k][j + k] == (*grid)[i - k - 1][j + k + 1] && (*grid)[i][j] != VIDE)
+				++k;
+			if (k == WIN_CNT - 1)
 				return (1);
+			k = 0;
 			++j;
 		}
 		j = 0;
@@ -135,6 +161,8 @@ int		is_winner(t_grid *grid)
 {
 	int ret;
 
+	if (WIN_CNT == 1)
+		return (1);
 	ret = 0;
 	ret += is_winner_horizontal(grid);
 	ret += is_winner_vertical(grid);
@@ -159,13 +187,14 @@ int		max_nb(int tab[GRID_W])
 	return (-1);
 }
 
-int		max(t_grid *grid, t_case color, int deep, t_case me)
+int		max(t_grid *grid, t_case color, int deep)
 {
 	int tab[GRID_W] = { 0 };
 	int i;
 	t_case adv;
 
-	if (color = JAUNE)
+	i = 0;
+	if (color == JAUNE)
 		adv = ROUGE;
 	else
 		adv = JAUNE;
@@ -193,7 +222,7 @@ int		max(t_grid *grid, t_case color, int deep, t_case me)
 		if (tab[i] != 2)
 		{
 			play_piece(grid, i + 1, color);
-			tab[i] = min(grid, me, deep - 1, color);
+			tab[i] = min(grid, adv, deep - 1, color);
 			remove_piece(grid, i + 1);
 			if (tab[i] == 1)
 				return (1);
@@ -222,6 +251,7 @@ int		min(t_grid *grid, t_case color, int deep, t_case me)
 	int tab[GRID_W] = { 0 };
 	int i;
 
+	i = 0;
 	if (deep < 0)
 		return (0);
 	while (i < GRID_W)
@@ -246,7 +276,7 @@ int		min(t_grid *grid, t_case color, int deep, t_case me)
 		if (tab[i] != 2)
 		{
 			play_piece(grid, i + 1, color);
-			tab[i] = max(grid, me, deep - 1, color);
+			tab[i] = max(grid, me, deep - 1);
 			remove_piece(grid, i + 1);
 			if (tab[i] == -1)
 				return (-1);
@@ -272,11 +302,11 @@ int		best_move(int tab[GRID_W])
 			max = 0;
 		++i;
 	}
-	tmp = rand() % GRID_W;
+	tmp = random() % GRID_W;
 	if (max == -1)
-		return (rand() % GRID_W + 1);
+		return (random() % GRID_W + 1);
 	while (tab[tmp] != 0)
-		tmp = rand() % GRID_W;
+		tmp = random() % GRID_W;
 	return (tmp + 1);
 }
 
@@ -286,7 +316,7 @@ int		move_to_play(t_grid *grid, t_case color, int deep)
 	int i;
 	t_case adv;
 
-	if (color = JAUNE)
+	if (color == JAUNE)
 		adv = ROUGE;
 	else
 		adv = JAUNE;
@@ -298,8 +328,12 @@ int		move_to_play(t_grid *grid, t_case color, int deep)
 		else
 		{
 			if (is_winner(grid) == 1)
+			{
+				remove_piece(grid, i + 1);
 				return (i + 1);
-			remove_piece(grid, i + 1);
+			}
+			else
+				remove_piece(grid, i + 1);
 		}
 		++i;
 	}
@@ -309,7 +343,7 @@ int		move_to_play(t_grid *grid, t_case color, int deep)
 		if (tab[i] != 2)
 		{
 			play_piece(grid, i + 1, color);
-			tab[i] = rec(grid, adv, deep - 1, color);
+			tab[i] = min(grid, adv, deep - 1, color);
 			remove_piece(grid, i + 1);
 			if (tab[i] == 1)
 				return (i + 1);
@@ -322,6 +356,8 @@ int		move_to_play(t_grid *grid, t_case color, int deep)
 int     p4_getmove_sle_guil(t_grid *grid, t_case color, int turn_count)
 {
 	int nb;
+
+	srandom(time(NULL));
 	if (41 - turn_count < DEEP)
 		nb = move_to_play(grid, color, 41 - turn_count);
 	else
