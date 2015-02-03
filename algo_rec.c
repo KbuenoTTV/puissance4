@@ -2,6 +2,8 @@
 
 Algorithme recusion
 
+//	On peut utiliser une structure de retour specifique
+
 t_ret		rec (tab, last_drop, deepth)
 
 	// Variable
@@ -17,8 +19,6 @@ t_ret		rec (tab, last_drop, deepth)
 		tant que (i < largeur du tableau)
 		{
 			retour = rec (tab, i, deepth + 1)
-			si (retour % 2)
-				return Victoir (deepth + 1);
 			sinon
 			{
 				// Calcul de ponderation
